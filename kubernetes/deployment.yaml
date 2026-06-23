@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hello-app
+  name: lab1
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: hello-app
+      app: lab1
   template:
     metadata:
       labels:
-        app: hello-app
+        app: lab1
     spec:
       containers:
-      - name: hello-app
-        image: nginx
+      - name: lab1
+        image: ghcr.io/aa-130/lab1:v2
         ports:
         - containerPort: 80

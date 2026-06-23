@@ -28,4 +28,4 @@ jobs:
           context: .
           #file: ./kubernetes/apps/app/Dockerfile 
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/${{ github.repository }}:v2
