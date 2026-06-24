@@ -10,7 +10,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  GITOPS_REPO: https://github.com/aa-130/lab1-gitops.git # Path to your dedicated GitOps repo
+  GITOPS_REPO: aa-130/lab1-gitops.git # Path to your dedicated GitOps repo
 
 jobs:
   # ----------------------------------------------------
