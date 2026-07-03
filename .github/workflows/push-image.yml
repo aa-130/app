@@ -16,21 +16,21 @@ jobs:
 
     steps:
       # Step 1: Log in to your Azure environment
-      - name: Log in to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      # - name: Log in to Azure
+      #  uses: azure/login@v2
+      #  with:
+      #    client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      #    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+      #    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       # Step 2: Execute Azure CLI commands directly on the runner host
-      - name: Run Azure CLI Commands
-        run: |
-          echo "=== Active Azure Account ==="
-          az account show --output table
+      #- name: Run Azure CLI Commands
+      #  run: |
+      #    echo "=== Active Azure Account ==="
+      #    az account show --output table
 
-          echo "=== Listing Resource Groups ==="
-          az group list --output table
+      #    echo "=== Listing Resource Groups ==="
+      #    az group list --output table
       - name: Print Environment and User Info
         run: |
           echo "=== Current User ==="
