@@ -1,79 +1,41 @@
-name: GitOps Build & Tag Pipeline
+name: Azure CLI Demo
 
 on:
   push:
     branches:
-      - main
-    tags:
-      - 'v*.*.*'  # Triggers when a semantic tag is pushed
+      - test-actions
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  GITOPS_REPO: aa-130/lab1-gitops # Path to your dedicated GitOps repo (owner/repo)
+# Required permissions for OIDC authentication to exchange tokens securely
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  # ----------------------------------------------------
-  # 1. BUILD & TEST JOB (Runs on every commit to main)
-  # ----------------------------------------------------
-  build-and-test:
-    if: github.ref_type != 'tag' # Explicit exclude, so no new build is created for tags
+  azure-commands:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Registry
-        uses: docker/login-action@v3
+      # Step 1: Log in to your Azure environment
+      - name: Log in to Azure
+        uses: azure/login@v2
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Build and Push Immutable Image (SHA Tagged)
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # ----------------------------------------------------
-  # 2. GITOPS RELEASE JOB (Triggers ONLY on vX.Y.Z tags)
-  # ----------------------------------------------------
-  release-to-gitops:
-    if: github.ref_type == 'tag'
-    runs-on: ubuntu-latest # Can run safely in GitHub Cloud; no local cluster access needed
-    steps:
-      - name: Checkout GitOps Configuration Repo
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.GITOPS_REPO }}
-          token: ${{ secrets.GITOPS_PAT }} # Personal Access Token with write access to GitOps repo
-
-      - name: Update Kubernetes Manifest with Approved SHA
+      # Step 2: Execute Azure CLI commands directly on the runner host
+      - name: Run Azure CLI Commands
         run: |
-          echo "Updating deployment target to Semantic Version: ${{ github.ref_name }}"
-          echo "Target Commit SHA: ${{ github.sha }}"
-          
-          # Target your production deployment manifest (e.g., deployment.yaml)
-          # This replaces the old image tag with the specific approved SHA
-          sed -i "s|image: .*|image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}|g" manifests/production/deployment.yaml
-          
-      - name: Commit and Push to GitOps Repo
+          echo "=== Active Azure Account ==="
+          az account show --output table
+
+          echo "=== Listing Resource Groups ==="
+          az group list --output table
+      - name: Print Environment and User Info
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@://github.com"
-          git add manifests/production/deployment.yaml
-          #TAG_NAME="${GITHUB_REF#refs/tags/}"
-          TAG_NAME="v2.0.2"
-          TAG_MSG=$(git tag -l --format='%(contents:subject)' "$TAG_NAME")
-          git commit -m "Deploy production release ${{ github.ref_name }} : ${TAG_MSG} (SHA: ${{ github.sha }})"
-          git push origin main
+          echo "=== Current User ==="
+          whoami
+          echo "=== Present Working Directory ==="
+          pwd
+          echo "=== Env ==="
+          env
