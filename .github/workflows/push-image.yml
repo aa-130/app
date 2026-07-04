@@ -25,7 +25,7 @@ jobs:
       security-events: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -78,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest # Can run safely in GitHub Cloud; no local cluster access needed
     steps:
       - name: Checkout GitOps Configuration Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ env.GITOPS_REPO }}
           token: ${{ secrets.GITOPS_PAT }} # Personal Access Token with write access to GitOps repo
