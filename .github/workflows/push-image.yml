@@ -22,6 +22,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -35,6 +36,30 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Image for Dependency Scan
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: local/app:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy Dependency Scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: local/app:scan
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          exit-code: 0
+
+      - name: Upload Trivy Scan Results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
 
       - name: Build and Push Immutable Image (SHA Tagged)
         uses: docker/build-push-action@v5
